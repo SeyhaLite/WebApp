@@ -1,0 +1,68 @@
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #00ffcc;
+      font-family: 'Press Start 2P', cursive;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff;
+      animation: fadeIn 1s;
+    }
+    input, button {
+      background-color: #333;
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      padding: 10px;
+      margin: 5px;
+      font-family: 'Press Start 2P', cursive;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #00ffcc;
+      color: #1a1a1a;
+      transform: scale(1.1);
+      transition: all 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel - <%airdropSettings.name%></h1>
+  <input id="airdropName" placeholder="Airdrop Name"><button onclick="setAirdropName()">Set</button>
+  <input id="currency" placeholder="Currency"><button onclick="setCurrency()">Set</button>
+  <input id="taskTitle" placeholder="Task Title"><input id="taskDesc" placeholder="Description">
+  <input type="file" id="logo" accept="image/png"><button onclick="addTask()">Add Task</button>
+  <input id="bonus" placeholder="Bonus"><button onclick="setBonus()">Set Bonus</button>
+  <input id="userId" placeholder="User ID"><input id="amount" placeholder="Amount"><button onclick="addBalance()">Add Balance</button>
+  <button onclick="cutBalance()">Cut Balance</button><button onclick="ban()">Ban</button><button onclick="unban()">Unban</button>
+  <input id="broadcastMsg" placeholder="Message"><button onclick="broadcast()">Broadcast</button>
+  <input id="picUrl" placeholder="Pic URL"><input id="link" placeholder="Link"><button onclick="broadcastPic()">Broadcast Pic</button>
+  <input id="withdrawAmount" placeholder="Withdraw Amount"><button onclick="setWithdraw()">Set Withdraw</button>
+  <button onclick="stopAcc()">Stop Account</button><button onclick="deleteAcc()">Delete Account</button>
+  <script>
+    function setAirdropName() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/setAirdropName?name=' + encodeURIComponent(document.getElementById('airdropName').value) + '&secret=SECRET', { method: 'POST' }); }
+    function setCurrency() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/setCurrency?currency=' + encodeURIComponent(document.getElementById('currency').value) + '&secret=SECRET', { method: 'POST' }); }
+    function addTask() { alert('Logo upload not implemented'); }
+    function setBonus() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/setBonus?bonus=' + document.getElementById('bonus').value + '&secret=SECRET', { method: 'POST' }); }
+    function addBalance() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/addBalance?userId=' + document.getElementById('userId').value + '&amount=' + document.getElementById('amount').value + '&secret=SECRET', { method: 'POST' }); }
+    function cutBalance() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/cutBalance?userId=' + document.getElementById('userId').value + '&amount=' + document.getElementById('amount').value + '&secret=SECRET', { method: 'POST' }); }
+    function ban() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/ban?userId=' + document.getElementById('userId').value + '&secret=SECRET', { method: 'POST' }); }
+    function unban() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/unban?userId=' + document.getElementById('userId').value + '&secret=SECRET', { method: 'POST' }); }
+    function broadcast() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/broadcast?msg=' + encodeURIComponent(document.getElementById('broadcastMsg').value) + '&secret=SECRET', { method: 'POST' }); }
+    function broadcastPic() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/broadcastPic?pic=' + encodeURIComponent(document.getElementById('picUrl').value) + '&link=' + encodeURIComponent(document.getElementById('link').value) + '&secret=SECRET', { method: 'POST' }); }
+    function setWithdraw() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/setWithdraw?amount=' + document.getElementById('withdrawAmount').value + '&secret=SECRET', { method: 'POST' }); }
+    function stopAcc() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/stopAcc?userId=' + document.getElementById('userId').value + '&secret=SECRET', { method: 'POST' }); }
+    function deleteAcc() { fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/deleteAcc?userId=' + document.getElementById('userId').value + '&secret=SECRET', { method: 'POST' }); }
+  </script>
+</body>
+</html>
