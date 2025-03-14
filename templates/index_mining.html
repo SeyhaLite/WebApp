@@ -1,0 +1,98 @@
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #00ffcc;
+      font-family: 'Press Start 2P', cursive;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff;
+      animation: fadeIn 1s;
+    }
+    p {
+      font-size: 12px;
+      margin: 10px 0;
+    }
+    button {
+      background-color: #333;
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      padding: 10px 20px;
+      margin: 5px;
+      font-family: 'Press Start 2P', cursive;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #00ffcc;
+    }
+    button:hover {
+      background-color: #00ffcc;
+      color: #1a1a1a;
+      transform: scale(1.1);
+      transition: all 0.3s;
+    }
+    #mineBtn {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Mining Page - <%airdropSettings.name%></h1>
+  <p>Balance: <span id="balance">0</span> <%airdropSettings.currency%></p>
+  <p>Energy: <span id="energy">100</span>/100</p>
+  <p>Per Click: <span id="perClick">1</span> <%airdropSettings.currency%></p>
+  <button id="mineBtn" onclick="mine()">Mine</button>
+  <button onclick="upgradeClick()">Upgrade Click (+1 per click, cost: 10)</button>
+  <script>
+    let balance = 0, energy = 100, perClick = 1;
+    function updateDisplay() {
+      document.getElementById('balance').innerHTML = balance;
+      document.getElementById('energy').innerHTML = energy;
+      document.getElementById('perClick').innerHTML = perClick;
+    }
+    function mine() {
+      if (energy > 0) {
+        balance += perClick;
+        energy -= 1;
+        updateDisplay();
+        fetchBalance();
+      }
+    }
+    function upgradeClick() {
+      if (balance >= 10) {
+        balance -= 10;
+        perClick += 1;
+        updateDisplay();
+        fetchBalance();
+      }
+    }
+    function fetchBalance() {
+      fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/getMiningData?secret=SECRET&userId=<%user.id%>')
+        .then(response => response.json())
+        .then(data => {
+          balance = data.balance;
+          energy = data.energy;
+          perClick = data.perClick;
+          updateDisplay();
+        });
+    }
+    fetchBalance();
+    setInterval(() => energy = Math.min(100, energy + 1), 5000); // Energy recharge
+    setInterval(fetchBalance, 5000); // Sync every 5 seconds
+  </script>
+</body>
+</html>

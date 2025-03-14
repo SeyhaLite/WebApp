@@ -1,0 +1,72 @@
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #00ffcc;
+      font-family: 'Press Start 2P', cursive;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff;
+      animation: fadeIn 1s;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 10px;
+    }
+    button {
+      background-color: #333;
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      padding: 10px 20px;
+      margin: 5px;
+      font-family: 'Press Start 2P', cursive;
+      cursor: pointer;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #00ffcc;
+    }
+    button:hover {
+      background-color: #00ffcc;
+      color: #1a1a1a;
+      transform: scale(1.1);
+      transition: all 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Referral Page - <%airdropSettings.name%></h1>
+  <ul id="refList"></ul>
+  <p>Earned Balance: <span id="earned">0</span> <%airdropSettings.currency%></p>
+  <p>Total Referrals: <span id="refTotal">0</span> (Need <%airdropSettings.refRequirement%> to activate)</p>
+  <button id="confirmBtn" onclick="confirmTerms()">Continue and Confirm Terms</button>
+  <script>
+    function fetchRef() {
+      fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/getRef?secret=SECRET&userId=<%user.id%>')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('refList').innerHTML = data.referrals.map(r => `<li>${r.name} (${r.username}): ${r.balance}</li>`).join('');
+          document.getElementById('earned').innerHTML = data.earned;
+          document.getElementById('refTotal').innerHTML = data.referrals.length + " (Need " + <%airdropSettings.refRequirement%> + " to activate)";
+          document.getElementById('confirmBtn').disabled = data.referrals.length < <%airdropSettings.refRequirement%>;
+        });
+    }
+    function confirmTerms() {
+      if (confirm('Accept Terms and Policy?')) {
+        fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/confirmTerms?secret=SECRET&userId=<%user.id%>', { method: 'POST' })
+          .then(() => alert('Terms confirmed. Referral link activated.'));
+      }
+    }
+    fetchRef();
+  </script>
+</body>
+</html>
