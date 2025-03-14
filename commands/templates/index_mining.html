@@ -1,0 +1,163 @@
+html
+     <html>
+     <head>
+       <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+       <style>
+         body {
+           background-color: #1a1a1a;
+           color: #00ffcc;
+           font-family: 'Press Start 2P', cursive;
+           margin: 0;
+           padding: 20px;
+           text-align: center;
+         }
+         h1 {
+           color: #ff00ff;
+           text-shadow: 0 0 10px #ff00ff;
+           animation: fadeIn 1s;
+         }
+         p {
+           font-size: 12px;
+           margin: 10px 0;
+         }
+         button {
+           background-color: #333;
+           border: 2px solid #00ffcc;
+           color: #00ffcc;
+           padding: 10px 20px;
+           margin: 5px;
+           font-family: 'Press Start 2P', cursive;
+           cursor: pointer;
+           border-radius: 5px;
+           box-shadow: 0 0 5px #00ffcc;
+         }
+         button:hover {
+           background-color: #00ffcc;
+           color: #1a1a1a;
+           transform: scale(1.1);
+           transition: all 0.3s;
+         }
+         button:disabled {
+           background-color: #555;
+           color: #888;
+           cursor: not-allowed;
+         }
+         #mineBtn {
+           animation: pulse 1.5s infinite;
+         }
+         @keyframes fadeIn {
+           from { opacity: 0; }
+           to { opacity: 1; }
+         }
+         @keyframes pulse {
+           0% { transform: scale(1); }
+           50% { transform: scale(1.05); }
+           100% { transform: scale(1); }
+         }
+       </style>
+     </head>
+     <body>
+       <h1>Mining Page - <%Bot.getProperty("airdropSettings").name%></h1>
+       <p>Balance: <span id="balance">0</span> <%Bot.getProperty("airdropSettings").currency%></p>
+       <p>Energy: <span id="energy">1000</span>/1000</p>
+       <p>Per Click: <span id="perClick">1</span> <%Bot.getProperty("airdropSettings").currency%></p>
+       <p>Per Click Level: <span id="perClickLevel">0</span>/<span id="maxLevel">5</span></p>
+       <p>Next Level Cost: <span id="nextCost">10</span> <%Bot.getProperty("airdropSettings").currency%></p>
+       <button id="mineBtn" onclick="mine()">Mine</button>
+       <button id="upgradeBtn" onclick="upgradeClick()">Upgrade Click</button>
+       <button id="claimBtn" onclick="claimAirdrop()">Claim Airdrop</button>
+       <script>
+         let balance = 0, energy = 1000, perClick = 1, perClickLevel = 0, upgradeConfig = {};
+
+         function updateDisplay() {
+           document.getElementById('balance').innerHTML = balance.toFixed(2);
+           document.getElementById('energy').innerHTML = energy.toFixed(0);
+           document.getElementById('perClick').innerHTML = perClick.toFixed(2);
+           document.getElementById('perClickLevel').innerHTML = perClickLevel;
+           document.getElementById('maxLevel').innerHTML = upgradeConfig.maxLevel;
+           const nextLevel = Math.min(perClickLevel + 1, upgradeConfig.maxLevel);
+           const nextCost = upgradeConfig.levels[`l${nextLevel}`]?.cost || "Max";
+           document.getElementById('nextCost').innerHTML = nextCost;
+           document.getElementById('upgradeBtn').disabled = perClickLevel >= upgradeConfig.maxLevel;
+         }
+
+         function mine() {
+           if (energy <= 0) {
+             alert("Not enough energy!");
+             return;
+           }
+           energy -= 1;
+           balance += perClick;
+           updateDisplay();
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/trackTapWork?secret=SECRET&userId=<%user.telegramid%>&energy=' + energy + '&balance=' + balance, {
+             method: 'POST'
+           })
+           .then(response => response.json())
+           if (!result.success) {
+               alert(result.error);
+               fetchBalance();
+             }
+           })
+           .catch(err => {
+             alert("Error syncing with server: " + err.message);
+             fetchBalance();
+           });
+         }
+
+         function upgradeClick() {
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/upgradePerClick?secret=SECRET&userId=<%user.telegramid%>', { method: 'POST' })
+             .then(response => response.json())
+             .then(result => {
+               if (result.success) {
+                 perClick = result.perClick;
+                 perClickLevel++;
+                 fetchBalance();
+               } else {
+                 alert(result.error);
+               }
+             })
+             .catch(err => alert("Error upgrading: " + err.message));
+         }
+
+         function claimAirdrop() {
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/claimAirdrop?secret=SECRET&userId=<%user.telegramid%>', { method: 'POST' })
+             .then(response => response.json())
+             .then(result => {
+               if (result.success) {
+                 balance += result.amount;
+                 updateDisplay();
+                 alert("Airdrop claimed! +" + result.amount + " <%Bot.getProperty('airdropSettings').currency%>");
+               } else {
+                 alert(result.error);
+               }
+             })
+             .catch(err => alert("Error claiming airdrop: " + err.message));
+         }
+
+         function fetchBalance() {
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/getMiningData?secret=SECRET&userId=<%user.telegramid%>')
+             .then(response => response.json())
+             .then(data => {
+               if (data.error) {
+                 alert(data.error);
+                 return;
+               }
+               balance = data.balance;
+               energy = data.energy;
+               perClick = data.perClick;
+               perClickLevel = data.perClickLevel;
+               upgradeConfig = data.upgradeConfig;
+               updateDisplay();
+             })
+             .catch(err => alert("Error fetching data: " + err.message));
+         }
+
+         fetchBalance();
+         setInterval(() => {
+           energy = Math.min(1000, energy + 1);
+           updateDisplay();
+         }, 5000); // Energy recharge
+         setInterval(fetchBalance, 10000); // Sync every 10 seconds
+       </script>
+     </body>
+     </html>
