@@ -1,0 +1,106 @@
+     /*CMD
+        command: index_ref.html
+        help: Add balance to a user
+        need_reply: false
+        auto_retry_time: 0
+        folder: page
+        answer: 
+        keyboard: 
+        aliases: 
+        group: 
+      CMD*/
+     <html>
+     <head>
+       <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+       <style>
+         body {
+           background-color: #1a1a1a;
+           color: #00ffcc;
+           font-family: 'Press Start 2P', cursive;
+           margin: 0;
+           padding: 20px;
+           text-align: center;
+         }
+         h1 {
+           color: #ff00ff;
+           text-shadow: 0 0 10px #ff00ff;
+           animation: fadeIn 1s;
+         }
+         p {
+           font-size: 12px;
+           margin: 10px 0;
+         }
+         button {
+           background-color: #333;
+           border: 2px solid #00ffcc;
+           color: #00ffcc;
+           padding: 10px 20px;
+           margin: 5px;
+           font-family: 'Press Start 2P', cursive;
+           cursor: pointer;
+           border-radius: 5px;
+           box-shadow: 0 0 5px #00ffcc;
+         }
+         button:hover {
+           background-color: #00ffcc;
+           color: #1a1a1a;
+           transform: scale(1.1);
+           transition: all 0.3s;
+         }
+         ul {
+           list-style: none;
+           padding: 0;
+           font-size: 10px;
+         }
+         li {
+           margin: 5px 0;
+         }
+         @keyframes fadeIn {
+           from { opacity: 0; }
+           to { opacity: 1; }
+         }
+       </style>
+     </head>
+     <body>
+       <h1>Referral - <%Bot.getProperty("airdropSettings").name%></h1>
+       <p>Referral Link: <span id="refLink">Loading...</span></p>
+       <p>Earned from Referrals: <span id="earned">0</span> <%Bot.getProperty("airdropSettings").currency%></p>
+       <p>Your Referrals:</p>
+       <ul id="referrals"></ul>
+       <button onclick="confirmTerms()">Accept Terms</button>
+       <script>
+         function fetchRef() {
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/getRef?secret=SECRET&userId=<%user.telegramid%>')
+             .then(response => response.json())
+             .then(data => {
+               if (data.error) {
+                 alert(data.error);
+                 return;
+               }
+               document.getElementById('earned').innerHTML = data.earned.toFixed(2);
+               document.getElementById('referrals').innerHTML = data.referrals.map(r => `<li>${r.name} (@${r.username}): ${r.balance.toFixed(2)}</li>`).join('');
+             })
+             .catch(err => alert("Error fetching referrals: " + err.message));
+
+           var refLink = "https://t.me/YOUR_BOT_USERNAME?start=" + <%user.telegramid%>;
+           document.getElementById('refLink').innerHTML = refLink;
+         }
+
+         function confirmTerms() {
+           fetch('https://api.bots.business/v2/bots/BOT_ID/web-app/confirmTerms?secret=SECRET&userId=<%user.telegramid%>', { method: 'POST' })
+             .then(response => response.json())
+             .then(result => {
+               if (result.success) {
+                 alert("Terms accepted!");
+               } else {
+                 alert(result.error);
+               }
+             })
+             .catch(err => alert("Error confirming terms: " + err.message));
+         }
+
+         fetchRef();
+         setInterval(fetchRef, 30000);
+       </script>
+     </body>
+     </html>
